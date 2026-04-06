@@ -1,5 +1,5 @@
 import hashlib
-
+from datetime import datetime
 
 def hashPassword(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -31,7 +31,7 @@ def login():
                 storedUser, storedPass = line.strip().split(",")
                 if username == storedUser and hashedPassword == storedPass:
                     print("Login success!")
-                    menu(username)  # <--- Change this line to include 'username'
+                    menu(username)
                     return username
         print("Invalid username or password.\n")
         starting()
@@ -55,9 +55,28 @@ def menu(username):
     print("5. Logout")
     action = input("Enter your action: ")
     if action == "1":
-        # logic for time in
-        pass
+        time_in(username)
+    elif action == "2":
+        time_out(username)
     elif action == "5":
         print(f"Logging out... Goodbye {username}!\n")
         starting()
+
+# TIME IN FUNCTION
+def time_in(username):
+    now = datetime.now()
+    with open(f"logs_{username}.txt", "a") as f:
+        f.write(f"TIME IN: {now}\n")
+    print("Time in recorded:", now)
+    menu(username)
+
+
+# TIME OUT FUNCTION
+def time_out(username):
+    now = datetime.now()
+    with open(f"logs_{username}.txt", "a") as f:
+        f.write(f"TIME OUT: {now}\n")
+    print("Time out recorded:", now)
+    menu(username)
+
 starting()

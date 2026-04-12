@@ -4,11 +4,11 @@ import os
 
 STORAGE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-
+# FOR HASHING
 def hashPassword(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-
+# STARTING MENU
 def starting():
     while True:
         print("\n--- PAYROLL SYSTEM LOGIN ---")
@@ -26,19 +26,19 @@ def starting():
         else:
             print("Invalid choice.")
 
-
+# LOGIN
 def login():
     # db = open("users.txt")
     username = input("Enter your username: ")
     password = input("Enter your password: ")
-    hashedPassword = hashPassword(password)
+    hashedPassword = hashPassword(password)  # use hashPassword function
 
     try:
         with open("users.txt", "r") as f:
             for line in f:
-                parts = line.strip().split(",")
+                parts = line.strip().split(",")  # read txt file
                 if len(parts) >= 2:
-                    if username == parts[0] and hashedPassword == parts[1]:
+                    if username == parts[0] and hashedPassword == parts[1]:  # check if parts (index) match
                         print("\nLogin success!")
                         return username
 
@@ -48,7 +48,7 @@ def login():
         print("User file not found. Please register users first.")
         return None
 
-
+# MAIN MENU
 def menu(username):
     while True:
         print("\n======================")
@@ -64,9 +64,9 @@ def menu(username):
         action = input("Enter your action: ")
 
         if action == "1":
-            record_time(username, "TIME IN")
+            record_time(username, "TIME IN")  # TIME IN tag
         elif action == "2":
-            record_time(username, "TIME OUT")
+            record_time(username, "TIME OUT")  # TIME OUT tag
         elif action == "3":
             display_time_logs(username)
         elif action == "4":
@@ -79,38 +79,38 @@ def menu(username):
 
 # TIME IN & TIME OUT FUNCTION
 def record_time(username, tag):
-    now = datetime.now()
-    timestamp = now.strftime(STORAGE_FORMAT)
+    now = datetime.now()  # get current time
+    timestamp = now.strftime(STORAGE_FORMAT)  # format current time
     with open(f"logs_{username}.txt", "a") as f:
-        f.write(f"{tag}: {timestamp}\n")
+        f.write(f"{tag}: {timestamp}\n")  # store time to txt
     print(f"{tag} recorded: {now.strftime('%I:%M %p')}")
 
-# time logs
+# TIME LOGS
 def display_time_logs(username):
     print(f"\n--- LOG HISTORY FOR {username.upper()} ---")
     print(f"{'DATE':<12} | {'TIME IN':<12} | {'TIME OUT':<12}")
     print("-" * 45)
 
-    log_file = f"logs_{username}.txt"
-    if not os.path.exists(log_file):
+    log_file = f"logs_{username}.txt"  # check the txt file depending on username
+    if not os.path.exists(log_file):  # check if it exists
         print("No logs found.")
         return
 
     with open(log_file, "r") as file:
-        time_in_val = None
-        found = False
+        time_in_val = None  # initialize empty variable
+        found = False  # initialize empty variable
         for line in file:
             if ": " in line:
-                tag, timestamp_str = line.strip().split(": ", 1)
-                t_obj = datetime.strptime(timestamp_str, STORAGE_FORMAT)
+                tag, timestamp_str = line.strip().split(": ", 1)  # split the content on the first ":"
+                t_obj = datetime.strptime(timestamp_str, STORAGE_FORMAT)  # converts string to datetime
 
                 if tag == "TIME IN":
-                    time_in_val = t_obj
-                elif tag == "TIME OUT" and time_in_val:
+                    time_in_val = t_obj  # dont display yet if no time out
+                elif tag == "TIME OUT" and time_in_val:  # display if both exists
                     print(f"{time_in_val.strftime('%Y-%m-%d'):<12} | "
                           f"{time_in_val.strftime('%I:%M %p'):<12} | "
                           f"{t_obj.strftime('%I:%M %p'):<12}")
-                    time_in_val = None
+                    time_in_val = None  # set back to none
                     found = True
 
         if not found:
@@ -118,8 +118,9 @@ def display_time_logs(username):
 
     input("\nPress Enter to return...")
 
-
+# CALCULATE SALARY
 def calculate_salary(username):
+    # initialize empty variables
     total_hours = 0
     time_in_val = None
     rate = 0.0
@@ -138,18 +139,18 @@ def calculate_salary(username):
     # compute hours
     log_file = f"logs_{username}.txt"
     if os.path.exists(log_file):
-        with open(log_file, "r") as file:
+        with open(log_file, "r") as file:  # read txt file
             for line in file:
                 if ": " in line:
-                    tag, timestamp_str = line.strip().split(": ", 1)
-                    t_obj = datetime.strptime(timestamp_str, STORAGE_FORMAT)
+                    tag, timestamp_str = line.strip().split(": ", 1)  # split the line on the first ":"
+                    t_obj = datetime.strptime(timestamp_str, STORAGE_FORMAT)  # convert string time to datetime
 
                     if tag == "TIME IN":
                         time_in_val = t_obj
                     elif tag == "TIME OUT" and time_in_val:
-                        duration = t_obj - time_in_val
-                        total_hours += duration.total_seconds() / 3600
-                        time_in_val = None
+                        duration = t_obj - time_in_val  # time out minus time in
+                        total_hours += duration.total_seconds() / 3600  # duration divided by 3600 to convert seconds to hrs
+                        time_in_val = None  # back to none
 
     salary = total_hours * rate
     print("\n" + "-" * 30)

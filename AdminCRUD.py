@@ -118,7 +118,7 @@ def menu():
         print("1. Add User")
         print("2. Edit Rate")
         print("3. Remove User")
-        print("3. Exit")
+        print("4. Exit")
         action = input("Enter action: ")
         while True:
             if action == "1":

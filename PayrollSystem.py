@@ -1,6 +1,7 @@
 import hashlib
 from datetime import datetime
 import os
+import pwinput
 
 STORAGE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -30,7 +31,7 @@ def starting():
 def login():
     # db = open("users.txt")
     username = input("Enter your username: ")
-    password = input("Enter your password: ")
+    password = pwinput.pwinput("Enter your password: ")
     hashedPassword = hashPassword(password)  # use hashPassword function
 
     try:
@@ -72,7 +73,11 @@ def menu(username):
         elif action == "4":
             calculate_salary(username)
         elif action == "5":
-            print(f"Logging out... Goodbye {username}!")
+            filterLogs(username, tag="TIME IN")
+        elif action == "6":
+            filterLogs(username, tag="TIME OUT")
+        elif action == "7":
+            print("Logging out")
             break
         else:
             print("Invalid option.")
@@ -160,5 +165,16 @@ def calculate_salary(username):
     print(f"GROSS PAY:    ₱{salary:.2f}")
     print("-" * 30)
     input("\nPress Enter to return...")
+
+def filterLogs(username, tag):
+    # file
+    logFile = f"logs_{username}.txt"
+
+    # open file
+    with open(f"logs_{username}.txt", "r") as file:
+    # printing
+        for line in file:
+            if line.startswith(tag):
+                print(line.strip())
 
 starting()

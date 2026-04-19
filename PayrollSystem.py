@@ -1,6 +1,5 @@
 import hashlib
 from datetime import datetime
-import os
 import pwinput
 
 STORAGE_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -29,7 +28,6 @@ def starting():
 
 # LOGIN
 def login():
-    # db = open("users.txt")
     username = input("Enter your username: ")
     password = pwinput.pwinput("Enter your password: ")
     hashedPassword = hashPassword(password)  # use hashPassword function
@@ -58,9 +56,7 @@ def menu(username):
         print(f"Welcome, {username}!")
         print("\n1. Time in")
         print("2. Time out")
-        print("3. Display daily time logs")
-        print("4. Calculate salary")
-        print("5. Logout")
+        print("3. Logout")
 
         action = input("Enter your action: ")
 
@@ -69,15 +65,7 @@ def menu(username):
         elif action == "2":
             record_time(username, "TIME OUT")  # TIME OUT tag
         elif action == "3":
-            display_time_logs(username)
-        elif action == "4":
-            calculate_salary(username)
-        elif action == "5":
-            filterLogs(username, tag="TIME IN")
-        elif action == "6":
-            filterLogs(username, tag="TIME OUT")
-        elif action == "7":
-            print("Logging out")
+            print("Logging Out.")
             break
         else:
             print("Invalid option.")
@@ -90,91 +78,5 @@ def record_time(username, tag):
         f.write(f"{tag}: {timestamp}\n")  # store time to txt
     print(f"{tag} recorded: {now.strftime('%I:%M %p')}")
 
-# TIME LOGS
-def display_time_logs(username):
-    print(f"\n--- LOG HISTORY FOR {username.upper()} ---")
-    print(f"{'DATE':<12} | {'TIME IN':<12} | {'TIME OUT':<12}")
-    print("-" * 45)
-
-    log_file = f"logs_{username}.txt"  # check the txt file depending on username
-    if not os.path.exists(log_file):  # check if it exists
-        print("No logs found.")
-        return
-
-    with open(log_file, "r") as file:
-        time_in_val = None  # initialize empty variable
-        found = False  # initialize empty variable
-        for line in file:
-            if ": " in line:
-                tag, timestamp_str = line.strip().split(": ", 1)  # split the content on the first ":"
-                t_obj = datetime.strptime(timestamp_str, STORAGE_FORMAT)  # converts string to datetime
-
-                if tag == "TIME IN":
-                    time_in_val = t_obj  # dont display yet if no time out
-                elif tag == "TIME OUT" and time_in_val:  # display if both exists
-                    print(f"{time_in_val.strftime('%Y-%m-%d'):<12} | "
-                          f"{time_in_val.strftime('%I:%M %p'):<12} | "
-                          f"{t_obj.strftime('%I:%M %p'):<12}")
-                    time_in_val = None  # set back to none
-                    found = True
-
-        if not found:
-            print("No completed shifts recorded.")
-
-    input("\nPress Enter to return...")
-
-# CALCULATE SALARY
-def calculate_salary(username):
-    # initialize empty variables
-    total_hours = 0
-    time_in_val = None
-    rate = 0.0
-
-    # get rate
-    try:
-        with open("users.txt", "r") as file:
-            for line in file:
-                parts = line.strip().split(",")
-                if parts[0] == username:
-                    rate = float(parts[2]) if len(parts) > 2 else 0.0
-                    break
-    except:
-        rate = 0.0
-
-    # compute hours
-    log_file = f"logs_{username}.txt"
-    if os.path.exists(log_file):
-        with open(log_file, "r") as file:  # read txt file
-            for line in file:
-                if ": " in line:
-                    tag, timestamp_str = line.strip().split(": ", 1)  # split the line on the first ":"
-                    t_obj = datetime.strptime(timestamp_str, STORAGE_FORMAT)  # convert string time to datetime
-
-                    if tag == "TIME IN":
-                        time_in_val = t_obj
-                    elif tag == "TIME OUT" and time_in_val:
-                        duration = t_obj - time_in_val  # time out minus time in
-                        total_hours += duration.total_seconds() / 3600  # duration divided by 3600 to convert seconds to hrs
-                        time_in_val = None  # back to none
-
-    salary = total_hours * rate
-    print("\n" + "-" * 30)
-    print(f"SALARY SUMMARY")
-    print(f"Total Hours:  {total_hours:.2f}")
-    print(f"Hourly Rate:  ₱{rate:.2f}")
-    print(f"GROSS PAY:    ₱{salary:.2f}")
-    print("-" * 30)
-    input("\nPress Enter to return...")
-
-def filterLogs(username, tag):
-    # file
-    logFile = f"logs_{username}.txt"
-
-    # open file
-    with open(f"logs_{username}.txt", "r") as file:
-    # printing
-        for line in file:
-            if line.startswith(tag):
-                print(line.strip())
 
 starting()
